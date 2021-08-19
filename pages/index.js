@@ -1,5 +1,3 @@
-import { server } from '../config/index';
-import nearByCities from 'nearby-cities';
 import Head from 'next/head';
 import Banner from '../components/Banner';
 import Header from '../components/Header';
@@ -7,8 +5,9 @@ import SmallCard from '../components/SmallCard';
 import MediumCard from '../components/MediumCard';
 import LargeCard from '../components/LargeCard';
 import Footer from '../components/Footer';
+import nearbyCities from 'nearby-big-cities';
 
-export default function Home({ exploreData, cardsData, citiesArr }) {
+export default function Home({ cardsData, citiesArr }) {
   console.log(citiesArr);
   return (
     <div className=''>
@@ -56,10 +55,6 @@ export default function Home({ exploreData, cardsData, citiesArr }) {
 }
 
 export async function getServerSideProps() {
-  const exploreData = await fetch('https://jsonkeeper.com/b/4G1G').then(res =>
-    res.json()
-  );
-
   const cardsData = await fetch('https://jsonkeeper.com/b/VHHT').then(res =>
     res.json()
   );
@@ -71,7 +66,7 @@ export async function getServerSideProps() {
     }
   ).then(res => res.json());
 
-  let cities = nearByCities({ latitude: lat, longitude: lon })
+  let cities = nearbyCities({ latitude: lat, longitude: lon })
     .filter(
       ({ population, country, name }) =>
         population > 80000 && country === countryCode && name !== city
@@ -88,13 +83,18 @@ export async function getServerSideProps() {
         .then(res => res.json())
         .then(img => img?.images_results[0]?.thumbnail);
 
-      return { img, ...city };
+      const travelTime = await fetch(
+        `https://dev.virtualearth.net/REST/v1/Routes/DistanceMatrixAsync?origins=${lat},${lon}&destinations=${city.lat},${city.lon}&travelMode=driving&key=${process.env.bing_maps_api_key}`
+      )
+        .then(res => res.json())
+        .then(({ resourceSets }) => resourceSets[0]?.estimatedTotal);
+
+      return { img, travelTime, ...city };
     })
   );
 
   return {
     props: {
-      exploreData,
       cardsData,
       citiesArr
     }
