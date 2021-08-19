@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .button {
+    @apply px-4 py-2 border rounded-full 
+    cursor-pointer hover:shadow-lg active:scale-95
+    active:bg-gray-100 transition transform duration-100
+    ease-out;
+  }
+}
+
+.mapboxgl-popup-content {
+  padding: 0 !important;
+  border-radius: 20px !important;
+  z-index: 100 !important;
+}
+
+.mapImage {
+  border-top-left-radius: 20px 20px !important;
+  border-top-right-radius: 20px 20px !important;
+}
